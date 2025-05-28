@@ -1,16 +1,48 @@
-# yuzu
+# Yuzu - Scrabble Word Learning Tool
 
-A new Flutter project.
+A Flutter-based application designed to help Scrabble players learn and practice word combinations, hooks, and anagrams.
+
+## Features
+
+- Upload custom word lists with front and back hooks
+- Practice unscrambling letters to find valid Scrabble words
+- Learn front and back hooks for common Scrabble words
+- Track your learning progress with statistics
+- Supports words from 2 to 10 letters
+
+## File Format
+
+The app accepts text files (.txt) with the following format:
+```
+WORD    FRONTHOOKS    BACKHOOKS
+```
+Example:
+```
+AIDA    z    s
+IDEA         ls
+```
+- Words should be in capital letters
+- Hooks should be separated by tabs or multiple spaces
+- Front hooks appear before the word (e.g., zAIDA)
+- Back hooks appear after the word (e.g., AIDAs)
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Clone this repository
+2. Install Flutter if you haven't already
+3. Run `flutter pub get` to install dependencies
+4. Launch the app using `flutter run`
 
-A few resources to get you started if this is your first Flutter project:
+## Built With
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter - Cross-platform UI framework
+- File Picker - For handling file uploads
+- Material Design - UI components and theming
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Version
+
+Current Version: 1.0.0

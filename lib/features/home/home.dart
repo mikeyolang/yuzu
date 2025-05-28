@@ -1,140 +1,42 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:yuzu/common/pickfile.dart';
 
 import 'package:yuzu/features/game/game.dart';
-import 'package:yuzu/features/home/letterCombinationModel.dart';
-import 'package:yuzu/features/home/wordDataModel.dart';
 
-// Model class to represent word data
 
-// Model class to represent a letter combination with all its possible words
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   Future<void> _uploadFile(BuildContext context) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['txt'],
+    final letterCombinations =
+        await FilePickerService.pickAndProcessFile(context);
+
+    if (letterCombinations == null) return;
+
+    if (letterCombinations.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('No valid word combinations found in file')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content:
+            Text('Found ${letterCombinations.length} letter combinations!'),
+      ),
     );
 
-    if (result != null) {
-      try {
-        // Read file content
-        final File file = File(result.files.single.path!);
-        final String content = await file.readAsString();
-
-        // Process file content
-        final List<LetterCombination> letterCombinations =
-            _processFileContent(content);
-
-        if (letterCombinations.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('No valid word combinations found in file')),
-          );
-          return;
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Found ${letterCombinations.length} letter combinations!')),
-        );
-
-        // Navigate to game screen with the processed data
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => GameScreen(
-                      letterCombinations: letterCombinations,
-                    )));
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error processing file: ${e.toString()}')),
-        );
-      }
-    }
-  }
-
-  List<LetterCombination> _processFileContent(String content) {
-    final lines = content.split('\n');
-    final Map<String, List<WordData>> wordsByLetters = {};
-
-    for (var line in lines) {
-      if (line.trim().isEmpty) continue;
-
-      final parts = line.trim().split(RegExp(r'\t+|\s{2,}'));
-
-      if (parts.isEmpty || parts[0].trim().isEmpty) continue;
-
-      final String word = parts[0].trim().toUpperCase(); // Convert to uppercase
-
-      if (word.length < 2 || word.length > 10) continue;
-
-      if (!RegExp(r'^[A-Z]+$').hasMatch(word)) continue;
-
-      List<String> frontHooks = [];
-      List<String> backHooks = [];
-
-      // Parse front hooks (now supports multiple hooks in one string)
-      if (parts.length > 1 && parts[1].trim().isNotEmpty) {
-        String frontHooksStr = parts[1].trim().toUpperCase();
-        frontHooks = frontHooksStr
-            .split('')
-            .where((hook) => RegExp(r'^[A-Z]$').hasMatch(hook))
-            .toList();
-      }
-
-      // Parse back hooks (now supports multiple hooks in one string)
-      if (parts.length > 2 && parts[2].trim().isNotEmpty) {
-        String backHooksStr = parts[2].trim().toUpperCase();
-        backHooks = backHooksStr
-            .split('')
-            .where((hook) => RegExp(r'^[A-Z]$').hasMatch(hook))
-            .toList();
-      }
-
-      final wordData = WordData(
-        word: word,
-        frontHooks: frontHooks,
-        backHooks: backHooks,
-      );
-
-      // Sort the word letters to create a canonical key
-      final sortedLetters = word.split('').toList()..sort();
-      final String letterKey = sortedLetters.join('');
-
-      if (!wordsByLetters.containsKey(letterKey)) {
-        wordsByLetters[letterKey] = [];
-      }
-      wordsByLetters[letterKey]!.add(wordData);
-    }
-
-    final List<LetterCombination> result = [];
-
-    wordsByLetters.forEach((letters, words) {
-      // Include all valid combinations, even single words with hooks
-      if (words.isNotEmpty) {
-        result.add(LetterCombination(
-          letters: letters,
-          possibleWords: words,
-        ));
-      }
-    });
-
-    return result;
-  }
-
-  void _viewStatistics(BuildContext context) {
-    // Navigate to statistics screen
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => StatisticsScreen()));
-  }
-
-  void _resumeSession(BuildContext context) {
-    // Check if there's an active session to resume and navigate to game screen
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => GameScreen()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GameScreen(
+          letterCombinations: letterCombinations,
+        ),
+      ),
+    );
   }
 
   @override
@@ -243,7 +145,7 @@ class HomeScreen extends StatelessWidget {
 
                   // Statistics Button
                   ElevatedButton(
-                    onPressed: () => _viewStatistics(context),
+                    onPressed: () => null,
                     style: ElevatedButton.styleFrom(
                       foregroundColor: const Color(0xFFFF9800),
                       backgroundColor: Colors.white,
